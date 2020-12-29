@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		body {
+			margin: 0px auto;
+		}
+		.wrapper {
+			margin:0 auto;
+			position:absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
+		.animated-plane {
+		  	width: 180px;
+		  	height: 100px;
+		  	position: absolute;
+		  	top: 0px;
+		  	left:-50px;
+		  	z-index:9999;
+		}
+		#route {
+			position:absolute;
+			top:45px;
+			left:55px;
+		}
+		.content-wrapper {
+			position: relative;
+		}
+		#svg-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+	</style>
+
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.js"></script>
+</head>
+<body>
+	<div class="content-wrapper">
+		<img src="img1.jpg" />
+		<div class="animated-plane" id="js-animated-plane">
+			<svg version="1.1" id="plane" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+				 width="180px" height="100px" xml:space="preserve">
+				<image href="source.gif" id="icon" height="50" />
+			</svg>
+		</div>
+
+		<svg id="svg-overlay" viewBox="0 0 1920 308" xmlns="http://www.w3.org/2000/svg" width="1920px" height="308px" xmlns:xlink="http://www.w3.org/1999/xlink">
+		  <!-- Cubic Bézier curve with absolute coordinates -->
+		  <path id="js-animation-path" fill="none" stroke="transparent"
+		        d="M 870,140
+		        C 870,140 890,150 930,160
+		        C 930,160 960,170 1000,180
+		        C 1000,180 1050,190 1100,200
+		        C 1100,200 1150,210 1200,220
+		        C 1200,220 1250,222 1300,225
+		        C 1300,225 1350,220 1400,215
+		        C 1400,215 1450,210 1500,200
+		        C 1500,200 1550,190 1600,175
+		        C 1600,175 1650,160 1700,145
+		        C 1700,145 1730,140 1750,135" />
+		</svg>
+	</div>
+	
+
+
+	<script type="text/javascript">
+		console.clear()
+		  // get the animation path node
+		  var $path = $('#js-animation-path'), path = $path[0];
+		  // get the animation object node
+		  var $obj = $('#js-animated-plane');
+
+		  // get path's length
+		  var pathLength = path.getTotalLength();
+		  var height = 50;
+		  var overlayTop = 20;
+		  console.log(111111, pathLength)
+
+		  // create new tween by initializing TWEEN.Tween object from 0 
+		  var tween = new TWEEN.Tween({ length: 0  })
+		      // to path length
+		      // in 2000 milliseconds
+		      .to({ length: pathLength }, 20000)
+		      // on update callback fires on every tick
+		      .onUpdate(function(){
+		        // get current point
+		        var point = path.getPointAtLength(this.length);
+		        // get previous point
+		        var pointPrevious = path.getPointAtLength(this.length-1);
+		        // get x1
+		        var x1 = point.y - pointPrevious.y;
+		        // get x2
+		        var x2 = point.x - pointPrevious.x;
+		        //get angle in radians and convert it to degrees
+		        var angle = Math.atan(x1/x2)*(180/Math.PI);
+		      
+		        // fix to normalize object angle
+		        if (point.x-pointPrevious.x < 0){
+		          angle = 180 + angle;
+		        }
+		      
+		        $obj.css({
+		          'transform': 'translate('+ point.x + 'px,'+ point.y +'px) rotate('+angle+'deg)'
+		        });
+
+		        if (pointPrevious.x == 870) {
+		        	height = 50;
+		        	overlayTop = 20;
+		        } else {
+		        	if (pointPrevious.x < 1250) {
+		        		height += 0.083;
+		        		overlayTop += 0.13;
+		        	} else if (pointPrevious.x > 1500) {
+		        		height -= 0.11;
+		        		overlayTop -= 0.05;
+		        	}
+		        }
+
+		        $("#icon").css({'height': height + 'px'});
+		        $('.animated-plane').css({'top': "-" + overlayTop + 'px'});
+		      })
+		      .onStart(function(){
+		        // console.clear();
+		      })
+		      // .repeat(999999999)
+		      .start();
+
+		  // animate loop
+		  animate = function(){
+		    requestAnimationFrame(animate)
+		      TWEEN.update()
+		  }
+		 
+		  //start the animation loop
+		  animate()
+	</script>
+
+</body>
+</html>
